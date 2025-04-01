@@ -12,6 +12,9 @@ using namespace std;
 // # are positions to be played
 string map = "#|#|#\n#|#|#\n#|#|#";
 
+int AI_map[9] = {};
+int AI_turns = 0;
+
 char Player = 'X';
 char AI = 'O';
 char currentTurn = 'X';
@@ -105,18 +108,25 @@ int checkWinner(){
 }
 
 int get_AI_position(){
-  int preferedPositions[4] = {0, 2, 6, 8};
-
   if (AI == 'O'){
+    int preferedPositions[4] = {0,4,12,16};
+    if (AI_turns == 3){
+      int preferedPositions[5] = {2,6,8,10,14};
+    }
+
+    // Get prefered postion
     for (int i=0; i<4; i++){
       for (int j=0; j<map.length(); j++){
         if (map[j] == '#' && j/2 == preferedPositions[i]){
           currentTurn = Player;
+          AI_map[AI_turns] = preferedPositions[i];
+          AI_turns++;
           return preferedPositions[i];
         }
       }
     }
   }
+  currentTurn = Player;
   return 0;
 }
 

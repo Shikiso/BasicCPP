@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cctype>
+#include <cstdlib>
 
 using namespace std;
 
@@ -12,8 +13,8 @@ using namespace std;
 // # are positions to be played
 string map = "#|#|#\n#|#|#\n#|#|#";
 
-int AI_map[9] = {};
-int AI_turns = 0;
+int Useds_positions[9] = {};
+int turnCounter = 0;
 
 char Player = 'X';
 char AI = 'O';
@@ -24,18 +25,22 @@ void draw_map(){
   cout << map << "\n\n";
 }
 
+int check_position_is_valid(int pos){
+  for (int i=0; i<map.length(); i=i+2){
+    if (map[i] == '#' && i/2 == pos-1){
+      return 1; // Valid
+    }
+  }
+  return 0; // Invalid
+}
+
 // Positions = 0 2 4 6 8 10 12 14 16
 int set_position(int pos, char player){
   string newMap;
   pos = pos * 2;
   for (int i=0; i<map.length(); i++){
     if (i == pos){
-      if (map[i] != '#'){
-        return -1;
-      }
-      else{
-        newMap = newMap+ player;
-      }
+      newMap = newMap+ player;
     }
     else{
       newMap = newMap + map[i];
@@ -108,25 +113,13 @@ int checkWinner(){
 }
 
 int get_AI_position(){
-  if (AI == 'O'){
-    int preferedPositions[4] = {0,4,12,16};
-    if (AI_turns == 3){
-      int preferedPositions[5] = {2,6,8,10,14};
-    }
-
-    // Get prefered postion
-    for (int i=0; i<4; i++){
-      for (int j=0; j<map.length(); j++){
-        if (map[j] == '#' && j/2 == preferedPositions[i]){
-          currentTurn = Player;
-          AI_map[AI_turns] = preferedPositions[i];
-          AI_turns++;
-          return preferedPositions[i];
-        }
-      }
+  int position = 0;
+  while (true){
+    position = rand() % 10;
+    if (check_position_is_valid(position) == 1){
+      return position;
     }
   }
-  currentTurn = Player;
   return 0;
 }
 
@@ -137,26 +130,25 @@ void play_position(){
       cout << "Players turn select where you want to play: ";
       cin >> position;
 
-      if (position > 9){
+      if (position > 9 || check_position_is_valid(position) == 0){
         cout << "Invalid position! Try again!" << endl;
         continue;
       }
       else{
-        if (set_position(position-1, currentTurn) == -1){
-          cout << "Invalid position! Try again!" << endl;
-          continue;
-        }
-        else{
-          currentTurn = AI;
-        }
+        set_position(position-1, currentTurn);
+        currentTurn = AI;
       }
     }
     else{
       cout << "AI turn." << endl;
-      set_position(get_AI_position(), currentTurn);
+      position = get_AI_position();
+      set_position(position-1, currentTurn);
+      currentTurn = Player;
     }
     break;
   }
+  Useds_positions[turnCounter] = position;
+  turnCounter++;
 }
 
 void mainLoop(){
@@ -168,6 +160,9 @@ void mainLoop(){
       cout << "Do you wish to play again? (y/n): ";
       cin >> restart;
       if (tolower(restart) == 'y'){
+        map = "#|#|#\n#|#|#\n#|#|#";
+        currentTurn = 'X';
+        select_object();
         continue;
       }
       else{
